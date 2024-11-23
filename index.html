@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Presentation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #presentation-container {
+            flex-grow: 1;
+            position: relative;
+            background: #fff;
+        }
+
+        #frame-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #frame-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #control-bar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        #control-bar.hidden {
+            transform: translateY(calc(100% - 8px));
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: #444;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #666;
+        }
+
+        #notch {
+            width: 100px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 4px 4px 0 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+        }
+
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            z-index: 1000;
+        }
+
+        #presentation-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+
+        #presentation-code {
+            padding: 1rem;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        #submit-btn {
+            padding: 1rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        #submit-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome-screen">
+        <h1>Welcome to Presentation System</h1>
+        <form id="presentation-form">
+            <input type="text" id="presentation-code" placeholder="Enter presentation code" required>
+            <button type="submit" id="submit-btn">Start Presentation</button>
+        </form>
+    </div>
+
+    <div id="presentation-container" style="display: none;">
+        <div id="frame-container">
+            <iframe id="content-frame" src="about:blank"></iframe>
+        </div>
+        <div id="control-bar">
+            <div id="notch"></div>
+            <div class="controls">
+                <button class="btn" id="prev-btn">← Previous</button>
+                <button class="btn" id="home-btn">Home</button>
+                <button class="btn" id="next-btn">Next →</button>
+            </div>
+            <div class="controls">
+                <button class="btn" id="fullscreen-btn">⤢ Fullscreen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Example presentation for testing
+        const examplePresentation = {
+            'example': ['https://www.google.com', 'https://www.example.com']
+        };
+
+        class PresentationSystem {
+            constructor() {
+                this.currentPresentation = null;
+                this.currentSlide = 0;
+                this.slides = [];
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Form submission
+                document.getElementById('presentation-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const code = document.getElementById('presentation-code').value;
+                    this.loadPresentation(code);
+                });
+
+                // Navigation buttons
+                document.getElementById('prev-btn').addEventListener('click', () => this.previousSlide());
+                document.getElementById('next-btn').addEventListener('click', () => this.nextSlide());
+                document.getElementById('home-btn').addEventListener('click', () => this.showWelcomeScreen());
+
+                // Fullscreen button
+                document.getElementById('fullscreen-btn').addEventListener('click', () => this.toggleFullscreen());
+
+                // Notch functionality
+                document.getElementById('notch').addEventListener('click', () => this.toggleControlBar());
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') this.previousSlide();
+                    if (e.key === 'ArrowRight') this.nextSlide();
+                    if (e.key === 'Escape') this.showWelcomeScreen();
+                });
+            }
+
+            async loadPresentation(code) {
+                // In a real implementation, this would fetch from the server
+                // For demo purposes, we'll use the example presentation
+                if (code === 'example') {
+                    this.slides = examplePresentation[code];
+                    this.currentPresentation = code;
+                    this.currentSlide = 0;
+                    this.showPresentation();
+                    this.updateSlide();
+                } else {
+                    alert('Presentation not found. Try "example" as the code.');
+                }
+            }
+
+            showPresentation() {
+                document.getElementById('welcome-screen').style.display = 'none';
+                document.getElementById('presentation-container').style.display = 'block';
+            }
+
+            showWelcomeScreen() {
+                document.getElementById('welcome-screen').style.display = 'flex';
+                document.getElementById('presentation-container').style.display = 'none';
+                document.getElementById('presentation-code').value = '';
+                this.currentPresentation = null;
+                this.slides = [];
+                this.currentSlide = 0;
+            }
+
+            updateSlide() {
+                const frame = document.getElementById('content-frame');
+                frame.src = this.slides[this.currentSlide];
+                this.updateNavigationButtons();
+            }
+
+            updateNavigationButtons() {
+                document.getElementById('prev-btn').disabled = this.currentSlide === 0;
+                document.getElementById('next-btn').disabled = this.currentSlide === this.slides.length - 1;
+            }
+
+            previousSlide() {
+                if (this.currentSlide > 0) {
+                    this.currentSlide--;
+                    this.updateSlide();
+                }
+            }
+
+            nextSlide() {
+                if (this.currentSlide < this.slides.length - 1) {
+                    this.currentSlide++;
+                    this.updateSlide();
+                }
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            toggleControlBar() {
+                const controlBar = document.getElementById('control-bar');
+                controlBar.classList.toggle('hidden');
+            }
+        }
+
+        // Initialize the presentation system
+        const presentationSystem = new PresentationSystem();
+    </script>
+</body>
+</html>
