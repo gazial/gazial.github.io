@@ -70,6 +70,11 @@
             background: #666;
         }
 
+        .btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+
         #notch {
             width: 100px;
             height: 8px;
@@ -126,6 +131,12 @@
         #submit-btn:hover {
             background: #0056b3;
         }
+
+        .error {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -134,6 +145,7 @@
         <form id="presentation-form">
             <input type="text" id="presentation-code" placeholder="Enter presentation code" required>
             <button type="submit" id="submit-btn">Start Presentation</button>
+            <div id="error-message" class="error"></div>
         </form>
     </div>
 
@@ -155,14 +167,8 @@
     </div>
 
     <script>
-        // Example presentation for testing
-        const examplePresentation = {
-            'example': ['https://www.google.com', 'https://www.example.com']
-        };
-
         class PresentationSystem {
             constructor() {
-                this.currentPresentation = null;
                 this.currentSlide = 0;
                 this.slides = [];
                 this.setupEventListeners();
@@ -196,16 +202,26 @@
             }
 
             async loadPresentation(code) {
-                // In a real implementation, this would fetch from the server
-                // For demo purposes, we'll use the example presentation
-                if (code === 'example') {
-                    this.slides = examplePresentation[code];
-                    this.currentPresentation = code;
+                try {
+                    const response = await fetch(`presentation/${code}.txt`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Presentation not found');
+                    }
+
+                    const content = await response.text();
+                    this.slides = content.split('\n').filter(url => url.trim() !== '');
+                    
+                    if (this.slides.length === 0) {
+                        throw new Error('Presentation is empty');
+                    }
+
                     this.currentSlide = 0;
                     this.showPresentation();
                     this.updateSlide();
-                } else {
-                    alert('Presentation not found. Try "example" as the code.');
+                    document.getElementById('error-message').textContent = '';
+                } catch (error) {
+                    document.getElementById('error-message').textContent = error.message;
                 }
             }
 
@@ -218,7 +234,7 @@
                 document.getElementById('welcome-screen').style.display = 'flex';
                 document.getElementById('presentation-container').style.display = 'none';
                 document.getElementById('presentation-code').value = '';
-                this.currentPresentation = null;
+                document.getElementById('error-message').textContent = '';
                 this.slides = [];
                 this.currentSlide = 0;
             }
