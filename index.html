@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Presentation System</title>
+    <title>Eğitim Sunum Merkezi</title>
     <style>
         * {
             margin: 0;
@@ -141,10 +141,10 @@
 </head>
 <body>
     <div id="welcome-screen">
-        <h1>Welcome to Presentation System</h1>
+        <h1>Sunum Merkezine Hoş Geldiniz</h1>
         <form id="presentation-form">
-            <input type="text" id="presentation-code" placeholder="Enter presentation code" required>
-            <button type="submit" id="submit-btn">Start Presentation</button>
+            <input type="text" id="presentation-code" placeholder="Sunum kodunuzu giriniz" required>
+            <button type="submit" id="submit-btn">Sunumu Başlat</button>
             <div id="error-message" class="error"></div>
         </form>
     </div>
@@ -206,14 +206,14 @@
                     const response = await fetch(`presentation/${code}.txt`);
                     
                     if (!response.ok) {
-                        throw new Error('Presentation not found');
+                        throw new Error('Sunum bulunamadı');
                     }
 
                     const content = await response.text();
                     this.slides = content.split('\n').filter(url => url.trim() !== '');
                     
                     if (this.slides.length === 0) {
-                        throw new Error('Presentation is empty');
+                        throw new Error('Sunum görüntülenemiyor');
                     }
 
                     this.currentSlide = 0;
